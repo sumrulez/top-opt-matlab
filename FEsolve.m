@@ -1,9 +1,9 @@
 function [U,max_disp] = FEsolve (dens,penal,IND,SPC,FORCE,Kloc)
-% x - вектор плотностей
+% Function solve plain stress finite element problem and returns displacements and maximum displacement 
 
-%данные модели
+%Г¤Г Г­Г­Г»ГҐ Г¬Г®Г¤ГҐГ«ГЁ
 global count_elem count_spc count_force count_node    
-%составление глобальной матрицы жесткости
+%Г±Г®Г±ГІГ ГўГ«ГҐГ­ГЁГҐ ГЈГ«Г®ГЎГ Г«ГјГ­Г®Г© Г¬Г ГІГ°ГЁГ¶Г» Г¦ГҐГ±ГІГЄГ®Г±ГІГЁ
 K_glob = zeros (2*count_node,2*count_node);
 for i_el=1:count_elem
 	
@@ -21,7 +21,7 @@ for i_el=1:count_elem
 
 end
 
-%закрепления
+%Г§Г ГЄГ°ГҐГЇГ«ГҐГ­ГЁГї
 fixeddof = zeros(count_spc,1);
 n=1;
 for i_spc = 1:count_spc
@@ -38,7 +38,7 @@ fixeddof = sort (fixeddof);
 alldof = [1:1:count_node *2]';
 freedof = setdiff (alldof,fixeddof);
 clear alldof fixeddof
-%силы
+%Г±ГЁГ«Г»
 F = zeros ([count_node*2,1]);
 for i=1:count_force
 	force_node = FORCE (i,2);
@@ -51,30 +51,8 @@ end
 U = zeros(count_node*2,1);
 Kglob_sp = sparse (K_glob);
 F_sp = sparse (F);
-%вычищение памяти перед решением СЛАУ
+%ГўГ»Г·ГЁГ№ГҐГ­ГЁГҐ ГЇГ Г¬ГїГІГЁ ГЇГҐГ°ГҐГ¤ Г°ГҐГёГҐГ­ГЁГҐГ¬ Г‘Г‹ГЂГ“
 clear K1 K F K_glob
 U(freedof) = Kglob_sp(freedof,freedof)\F_sp(freedof);
 max_disp = max(U);
 save_to_file (U,count_node);
-
-
-%Функции формы
-	% N=[ 0.25*(1-z)*(1-n ...
-	% 0.25*(1+z)*(1-n) ...
-	% 0.25*(1+z)*(1+n) ...
-	% 0.25*(1-z)*(1+n)]
-
-
-
-
-
-
-
-
-
-% F = 0.5* [0 0 0 0 0 1 0 1]';
-% v=10^50;
-% K_9 (1,1)=v; K_9 (2,2)=v;  K_9 (3,3)=v; K_9 (4,4)=v; 
-% U = K_9\F;
-% KE (1,1)=v; KE (2,2)=v;  KE (3,3)=v; KE (4,4)=v; 
-% U1 = KE\F;
